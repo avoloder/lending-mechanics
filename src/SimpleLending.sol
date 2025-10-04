@@ -4,7 +4,7 @@ pragma solidity 0.8.30;
 
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import {AggregatorV3Interface} from "@chainlink/src/v0.8/shared/interfaces/AggregatorV3Interface.sol";
+import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol";
 
 /// @title SimpleLending
 /// @notice Minimal overcollateralized lending contract with a single collateral and borrow asset
@@ -35,7 +35,7 @@ contract SimpleLending {
     /// @param user The address of the liquidated borrower
     /// @param userDebt The remaining user debt after liquidation
     /// @param amountRepaid The amount of debt repaid by the liquidator
-    event Liquidated(address indexed user, uint256 userDebt, uint256 amountRepaid)
+    event Liquidated(address indexed user, uint256 userDebt, uint256 amountRepaid);
 
 
     /// @notice ERC20 token accepted as collateral
@@ -122,7 +122,7 @@ contract SimpleLending {
     /// @param amount The amount of borrow tokens to repay (capped at current debt)
     function repay(uint256 amount) external {
         require(amount > 0, "Cannot repay zero amount");
-        uint256 debt = userDebt[msg.sender] -= repayAmount;
+        uint256 debt = userDebt[msg.sender];
         uint256 repayAmount = amount > debt ? debt : amount;
         totalDebt -= repayAmount;
         userDebt[msg.sender] -= repayAmount;
@@ -149,7 +149,7 @@ contract SimpleLending {
         // 4. User gets the paid amount in collateral unit + 5% bonus 
         uint256 collateralToSeize = (debtAmount * (10 ** (18 - 6)) * 1e18 * (BPS_DENOMINATOR + LIQUIDATION_BONUS) / BPS_DENOMINATOR) / (collateralPrice * 10 ** (18 - 8));
 
-        totalDebt -= debtAmout;
+        totalDebt -= debtAmount;
         userDebt[borrower] -= debtAmount;
         userCollateral[borrower] -= collateralToSeize;
 
